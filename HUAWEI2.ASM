@@ -3,23 +3,26 @@
 org 100h
 
 Start:
+	mov ch, 40					; ширина рамки
+	mov ah, 10					; высота рамки
 	call DrawFrame
 	call Exit					; завершение программы
 
 DrawFrame:
+	sub ch, 2
+	mov cl, ch
 	mov si, offset String		; адрес строки
 	mov di, 0b800h				; адрес начала печати
-	mov cx, 0
 	call DrawString				; вызов функции, печатающей одну строку
 
-	mov cx, 0					; счетчик количества строк
+	dec ah
 Loop_2:							; цикл для печати строк (внутренность рамки)
 	add di, 10					; смещение адреса начала печати для перевода на новую строку
 	mov si, offset String + 3	; смещение для печати второй тройки символов из строки
 	call DrawString				; вызов функции, печатающей одну строку
-	inc cx						; счетчик цикла
-	cmp cx, 10					; проверка условия выхода из цикла
-	jbe Loop_2
+	dec ah						; счетчик цикла
+	cmp ah, 0					; проверка условия выхода из цикла
+	jne Loop_2
 
 	mov si, offset String + 6	; смещение для печати третьей тройки символов из строки
 	call DrawString				; вызов функции, печатающей одну строку
@@ -49,18 +52,23 @@ DrawString:
 Loop_1:							; цикл для печати строки
 	add bx, 2					; смещение для печати новой буквы
 	mov byte ptr es:[bx], al	; печать буквы
-	cmp bx, 40					; проверка условия выхода из цикла
-	jbe Loop_1
+	dec ch
+	cmp ch, 0					; проверка условия выхода из цикла
+	jne Loop_1
+
+	mov ch, cl
 
 	mov es, dx					;\
 	inc si						; получение новой буквы из строки
 	mov al, [si]				;/
 
+	push bx
 	mov bx, di					;\
 	mov es, bx					; запись сегмента видеопамяти в es
-	mov bx, 0					;/
+	pop bx
 
-	mov byte ptr es:[42], al	; запись последнего сивола в строке
+	add bx, 2
+	mov byte ptr es:[bx], al	; запись последнего сивола в строке
 
 	ret
 endp
