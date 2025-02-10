@@ -6,36 +6,70 @@ Start:
 	mov ch, 40					; frame width
 	mov ah, 10					; frame height
 
+	mov di, 0081h
+FindParam:
+	mov al, ' '
+	repz scasb
+	dec di
+	push di
+	mov si, di
+
+ScanParams:
+	lodsb
+	cmp al, 0Dh
+	je ParamsEnded
+	cmp al, 20h
+	jne ScanParams
+
+	dec si
+	mov byte ptr [si], '$'
+	mov di, si
+	inc di
+	jmp FindParam
+
+ParamsEnded:
+	dec si
+	mov byte ptr [si], '$'
+
+	mov bx, 0b800h
+  	mov es, bx
+	mov bx, 0
+
+	pop si
+	mov al, [si]
+	mov byte ptr es:[bx], al
+	add bx, 2
+
 	call DrawFrame
 	call Exit
 
-;---------------------------------------------------;
-;            		Draw a frame
+;---------------------------------------------------
+; Draw a frame
 ; Entry: CH = frame width
 ;        AH = frame height
 ; Exit : None
 ; Destr:
-;---------------------------------------------------;
+;---------------------------------------------------
 DrawFrame:
 	sub ch, 2
 	mov cl, ch
-	mov si, offset String
+	;mov si, offset String
 	mov di, 0b800h
 
 	call HeightOffset
 
 	call DrawString
-
+	add si, 3
 	dec ah
 Loop_2:
 	add di, 10
-	mov si, offset String + 3
+
 	call DrawString
 	dec ah
 	cmp ah, 0
 	jne Loop_2
 
-	mov si, offset String + 6
+	add si, 3
 	call DrawString
 
 	mov ah, 0
@@ -46,13 +80,13 @@ Loop_2:
 	mov bx, offset Text
 	call StringLength
 	call WidthOffset
-	mov si, offset Text
+	mov bp, offset Text
 Loop_6:
-	mov al, [si]
+	mov al, [bp]
 	cmp al, '$'
 	je Done_6
 	mov byte ptr es:[bx], al
-	inc si
+	inc bp
 	add bx, 2
 	jmp Loop_6
 Done_6:
@@ -60,13 +94,13 @@ Done_6:
 	ret
 endp
 
-;---------------------------------------------------;
-;            Draw a line of the frame
+;---------------------------------------------------
+; Draw a line of the frame
 ; Entry: DI = video memory address
 ;        SI = address of the style line
 ; Exit : None
 ; Destr:
-;---------------------------------------------------;
+;---------------------------------------------------
 DrawString:
 	mov dx, es
 
@@ -110,15 +144,17 @@ Loop_1:
 	add bx, 2
 	mov byte ptr es:[bx], al
 
+	sub si, 2
+
 	ret
 endp
 
-;---------------------------------------------------;
-;          Find the length of the string
+;---------------------------------------------------
+; Find the length of the string
 ; Entry: BX = offset string
 ; Exit : CH = length of the string
 ; Destr: BX
-;---------------------------------------------------;
+;---------------------------------------------------
 StringLength:
 	mov ch, 0
 
@@ -134,14 +170,13 @@ Done_5:
 	ret
 endp
 
-;---------------------------------------------------;
-;     Сalculate the width offset for displaying
-;				  a centered row.
+;---------------------------------------------------
+; Сalculate the width offset for displaying a centered row
 ; Entry: BX = offset string
 ; 		 CH = length of the string
 ; Exit : None
 ; Destr: CL
-;---------------------------------------------------;
+;---------------------------------------------------
 WidthOffset:
 	mov cl, [screen_width]
 	sub cl, ch
@@ -149,7 +184,7 @@ WidthOffset:
 Loop_3:
 	add bx, 2
 	dec cl
-	cmp cl, 0
+	cmp cl, 0 ; test cl cl
 	jne Loop_3
 
 	mov cl, ch
@@ -157,13 +192,12 @@ Loop_3:
 	ret
 endp
 
-;---------------------------------------------------;
-;    Сalculate the height offset for displaying
-;				  a centered row.
+;---------------------------------------------------
+; Сalculate the height offset for displaying a centered row
 ; Entry: AH = offset frame
 ; Exit : None
 ; Destr: None
-;---------------------------------------------------;
+;---------------------------------------------------
 HeightOffset:
 	push ax
 	mov al, ah
@@ -181,12 +215,12 @@ Loop_4:
 	ret
 endp
 
-;---------------------------------------------------;
-;    	  Сomplete the program execution.
+;---------------------------------------------------
+; Сomplete the program execution.
 ; Entry: None
 ; Exit : None
 ; Destr: None
-;---------------------------------------------------;
+;---------------------------------------------------
 Exit:
 	mov ax, 4c00h
 	int 21h
@@ -195,7 +229,7 @@ String:
 	db '+-+| |+-+$'
 
 Text:
-	db 'Hello world!$'
+	db 'Hello Vova!$'
 
 screen_width db 80
 screen_height db 25
