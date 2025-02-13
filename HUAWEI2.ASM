@@ -3,9 +3,6 @@
 org 100h
 
 Start:
-	mov ch, 40					; frame width
-	mov ah, 10					; frame height
-
 	mov di, 0081h
 FindParam:
 	mov al, 2Ch
@@ -35,17 +32,28 @@ ParamsEnded:
   	mov es, bx
 	mov bx, 0
 
-	pop si; Обработка стилевой строки
+	; обработка текста
+	pop bp
 
+	; обработка стилевой строки
+	pop si
+
+	; обработка цвета
 	pop di
 	call atoi
-	mov ah, cl
+	mov dl, cl
 
+	; обработка высоты рамки
+	pop di
+	call atoi
+	mov ah, cl				; frame height
+
+	; обработка ширины рамки
 	pop di
 	push ax
 	call atoi
 	pop ax
-	mov ch, cl
+	mov ch, cl    			; frame width
 
 	call DrawFrame
 	call Exit
@@ -114,10 +122,9 @@ Loop_2:
 	call HeightOffset
 	mov bx, di
 	mov es, bx
-	mov bx, offset Text
+	mov bx, bp
 	call StringLength
 	call WidthOffset
-	mov bp, offset Text
 Loop_6:
 	mov al, [bp]
 	cmp al, '$'
@@ -139,9 +146,11 @@ endp
 ; Destr:
 ;---------------------------------------------------
 DrawString:
+	push ax
+	mov al, dl
 	mov dx, es
 
-	mov al, [si]
+	mov ah, [si]
 
 	mov bx, di
 	mov es, bx
@@ -149,11 +158,12 @@ DrawString:
 
 	call WidthOffset
 
-	mov es:[bx], al
+	mov byte ptr es:[bx], ah
+	mov byte ptr es:[bx+1], al
 
 	mov es, dx
 	inc si
-	mov al, [si]
+	mov ah, [si]
 
 	push bx
 	mov bx, di
@@ -162,7 +172,8 @@ DrawString:
 
 Loop_1:
 	add bx, 2
-	mov byte ptr es:[bx], al
+	mov byte ptr es:[bx], ah
+	mov byte ptr es:[bx+1], al
 	dec ch
 	cmp ch, 0
 	jne Loop_1
@@ -171,7 +182,7 @@ Loop_1:
 
 	mov es, dx
 	inc si
-	mov al, [si]
+	mov ah, [si]
 
 	push bx
 	mov bx, di
@@ -179,10 +190,13 @@ Loop_1:
 	pop bx
 
 	add bx, 2
-	mov byte ptr es:[bx], al
+	mov byte ptr es:[bx], ah
+	mov byte ptr es:[bx+1], al
 
 	sub si, 2
 
+	mov dl, al
+	pop ax
 	ret
 endp
 
