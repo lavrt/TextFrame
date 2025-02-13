@@ -28,23 +28,45 @@ ParamsEnded:
 		mov 	es, bx
 		mov 	bx, 0
 
-		pop 	bp 		; обработка текста
+		pop 	bp 		; text
 
-		pop 	si 		; обработка стилевой строки
+		pop		di   	; style
+		call	atoi
+		cmp		cl, 0
+		jne		SkipReceivingString
+		pop 	si
+SkipReceivingString:
+		cmp		cl, 1
+		je		LineSwitch_1
+		cmp		cl, 2
+		je		LineSwitch_2
+		cmp		cl, 3
+		je		LineSwitch_3
+		jmp		EndOfLineSwitch
+LineSwitch_1:
+		mov 	si, offset Style_1
+		jmp		EndOfLineSwitch
+LineSwitch_2:
+		mov 	si, offset Style_2
+		jmp		EndOfLineSwitch
+LineSwitch_3:
+		mov 	si, offset Style_3
+		jmp		EndOfLineSwitch
+EndOfLineSwitch:
 
-		pop 	di		; обработка цвета
+		pop 	di		; color
 		call 	atoi
 		mov 	dl, cl
 
-		pop 	di		; обработка высоты рамки
+		pop 	di		; frame height
 		call 	atoi
-		mov 	ah, cl	; frame height
+		mov 	ah, cl
 
-		pop 	di		; обработка ширины рамки
+		pop 	di		; frame width
 		push 	ax
 		call 	atoi
 		pop 	ax
-		mov 	ch, cl  ; frame width
+		mov 	ch, cl
 
 		call 	DrawFrame
 		call 	Exit
@@ -89,7 +111,6 @@ Loop_7:
 DrawFrame:
 		sub 	ch, 2
 		mov 	cl, ch
-		;mov 	si, offset String
 		mov 	di, 0b800h
 
 		call 	HeightOffset
@@ -265,8 +286,12 @@ Exit:
 		mov 	ax, 4c00h
 		int 	21h
 
-String:
+Style_1:
 		db 		'+-+| |+-+$'
+Style_2:
+		db 		'/-\| |+-+$'
+Style_3:
+		db 		'***< >***$'
 
 Text:
 		db 		'Hello Vova!$'
