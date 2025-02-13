@@ -8,7 +8,7 @@ Start:
 
 	mov di, 0081h
 FindParam:
-	mov al, ' '
+	mov al, 2Ch
 	repz scasb
 	dec di
 	push di
@@ -18,7 +18,7 @@ ScanParams:
 	lodsb
 	cmp al, 0Dh
 	je ParamsEnded
-	cmp al, 20h
+	cmp al, 2Ch
 	jne ScanParams
 
 	dec si
@@ -35,10 +35,37 @@ ParamsEnded:
   	mov es, bx
 	mov bx, 0
 
-	pop si
-	mov al, [si]
-	mov byte ptr es:[bx], al
-	add bx, 2
+	pop si; Обработка стилевой строки
+
+	pop di
+
+
+	mov dh, 0
+	mov ax, 0
+	mov cl, 0
+Loop_8:
+	mov byte ptr al, [di]
+	cmp al, '$'
+	je Loop_7
+	cmp dh, 0
+	je Loop_9
+	mov ah, cl
+	shl cl, 3
+	shl ah, 1
+	add cl, ah
+Loop_9:
+	mov dh, 1
+	inc di
+	sub al, '0'
+	add cl, al
+	jmp Loop_8
+Loop_7:
+	mov ah, cl
+
+
+
+	;mov ah, 10					; frame height
+	;mov byte ptr es:[bx], ah
 
 	call DrawFrame
 	call Exit
