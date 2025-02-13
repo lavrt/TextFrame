@@ -38,8 +38,25 @@ ParamsEnded:
 	pop si; Обработка стилевой строки
 
 	pop di
+	call atoi
+	mov ah, cl
 
+	pop di
+	push ax
+	call atoi
+	pop ax
+	mov ch, cl
 
+	call DrawFrame
+	call Exit
+
+;---------------------------------------------------
+; ASCII to integer (ATOI)
+; Entry: DI = address of the string
+; Exit : CL = integer
+; Destr: DH, AX
+;---------------------------------------------------
+Atoi:
 	mov dh, 0
 	mov ax, 0
 	mov cl, 0
@@ -60,15 +77,8 @@ Loop_9:
 	add cl, al
 	jmp Loop_8
 Loop_7:
-	mov ah, cl
-
-
-
-	;mov ah, 10					; frame height
-	;mov byte ptr es:[bx], ah
-
-	call DrawFrame
-	call Exit
+	ret
+endp
 
 ;---------------------------------------------------
 ; Draw a frame
