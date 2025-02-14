@@ -112,23 +112,18 @@ DrawFrame:
 		sub 	ch, 2
 		mov 	cl, ch
 		mov 	di, 0b800h
-
 		call 	HeightOffset
-
 		call 	DrawString
 		add 	si, 3
 		dec 	ah
 Loop_2:
 		add 	di, 10
-
 		call 	DrawString
 		dec 	ah
 		cmp 	ah, 0
 		jne 	Loop_2
-
 		add 	si, 3
 		call 	DrawString
-
 		mov 	ah, 0
 		mov 	di, 0b800h
 		call 	HeightOffset
@@ -160,27 +155,20 @@ DrawString:
 		push 	ax
 		mov 	al, dl
 		mov 	dx, es
-
 		mov 	ah, [si]
-
 		mov 	bx, di
 		mov 	es, bx
 		mov 	bx, 0
-
 		call 	WidthOffset
-
 		mov 	byte ptr es:[bx], ah
 		mov 	byte ptr es:[bx+1], al
-
 		mov 	es, dx
 		inc 	si
 		mov 	ah, [si]
-
 		push 	bx
 		mov 	bx, di
 		mov 	es, bx
 		pop 	bx
-
 Loop_1:
 		add 	bx, 2
 		mov 	byte ptr es:[bx], ah
@@ -188,24 +176,18 @@ Loop_1:
 		dec 	ch
 		cmp 	ch, 0
 		jne 	Loop_1
-
 		mov 	ch, cl
-
 		mov 	es, dx
 		inc 	si
 		mov 	ah, [si]
-
 		push	bx
 		mov 	bx, di
 		mov 	es, bx
 		pop 	bx
-
 		add 	bx, 2
 		mov 	byte ptr es:[bx], ah
 		mov 	byte ptr es:[bx+1], al
-
 		sub 	si, 2
-
 		mov 	dl, al
 		pop 	ax
 		ret
@@ -221,12 +203,11 @@ StringLength:
 		mov 	ch, 0
 Loop_5:
 		cmp 	byte ptr [bx], '$'
-		je 		Done_5
+		je 		Loop_11
 		inc 	ch
 		inc 	bx
 		jmp 	Loop_5
-
-Done_5:
+Loop_11:
 		mov 	bx, 0
 		ret
 		endp
@@ -247,9 +228,7 @@ Loop_3:
 		dec 	cl
 		cmp 	cl, 0 ; test cl cl
 		jne 	Loop_3
-
 		mov 	cl, ch
-
 		ret
 		endp
 
@@ -270,9 +249,7 @@ Loop_4:
 		dec 	ah
 		cmp 	ah, 0
 		jne 	Loop_4
-
 		pop 	ax
-
 		ret
 		endp
 
@@ -292,9 +269,6 @@ Style_2:
 		db 		'/-\| |+-+$'
 Style_3:
 		db 		'***< >***$'
-
-Text:
-		db 		'Hello Vova!$'
 
 screen_width  db 80
 screen_height db 25
